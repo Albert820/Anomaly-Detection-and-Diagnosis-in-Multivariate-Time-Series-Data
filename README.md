@@ -2,7 +2,7 @@
 
 這是使用PyTorch實作MSCRED
 
-論文原文： http://in.arxiv.org/abs/1811.08055
+論文原文： [http://in.arxiv.org/abs/1811.08055](https://arxiv.org/abs/1811.08055)
 
 我參照的程式網址: https://github.com/Zhang-Zhi-Jie/Pytorch-MSCRED
 我是參照該網址的程式碼，做了些修改，可以將合成資料的異常點順利偵測出來。
