@@ -79,7 +79,7 @@ class ConvLSTM(nn.Module):
             self._all_layers.append(cell)
 
     def forward(self, input):
-        print("input.shape: ", input.shape)
+        #print("input.shape: ", input.shape)
         internal_state = []
         outputs = []
         for step in range(self.step):
@@ -87,6 +87,7 @@ class ConvLSTM(nn.Module):
             x = x.unsqueeze(0)
             for i in range(self.num_layers):
                 # all cells are initialized in the first step
+                #print(self.num_layers)
                 name = 'cell{}'.format(i)
                 if step == 0:
                     bsize, _, height, width = x.size()
@@ -102,11 +103,16 @@ class ConvLSTM(nn.Module):
                 
                 x, new_c = getattr(self, name)(x, h, c)
                 internal_state[i] = (x, new_c)
-                # only record effective steps
-                if step in self.effective_step:
-                    #print("input.shape: ", input.shape)
-                    #print("x.shape: ", x.shape)
-                    outputs.append(x)
+
+            outputs.append(x)
+            #print(x.shape)
+            '''    
+            # only record effective steps
+            if step in self.effective_step:
+                #print("input.shape: ", input.shape)
+                #print("x.shape: ", x.shape)
+                outputs.append(x)
+            '''
     
         return outputs, (x, new_c)
     

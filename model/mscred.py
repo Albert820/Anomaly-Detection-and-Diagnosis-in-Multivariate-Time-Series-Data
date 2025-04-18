@@ -3,8 +3,18 @@ import torch.nn as nn
 import numpy as np
 from model.convolution_lstm import ConvLSTM
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+"""
 def attention(ConvLstm_out):
+    '''
+    print(ConvLstm_out[0][0].shape)
+    print(len(ConvLstm_out))
+    print(ConvLstm_out)
+    print(len(ConvLstm_out[0]))
+    '''
+    ConvLstm_out = torch.stack(ConvLstm_out[0])
+    ConvLstm_out = ConvLstm_out.view(ConvLstm_out.shape[0],ConvLstm_out.shape[2],ConvLstm_out.shape[3],ConvLstm_out.shape[4])
+    #print(ConvLstm_out.shape)
+    
     attention_w = []
     sum = 0
     for k in range(5):
@@ -13,11 +23,45 @@ def attention(ConvLstm_out):
     for k in range(5):
         attention_w.append(torch.sum((torch.exp(torch.mul(ConvLstm_out[k], ConvLstm_out[-1])/5)) / sum))
     m = nn.Softmax()
+    '''
     attention_w = torch.reshape(m(torch.stack(attention_w)), (-1, 5))
     cl_out_shape = ConvLstm_out.shape
     ConvLstm_out = torch.reshape(ConvLstm_out, (5, -1))
     convLstmOut = torch.matmul(attention_w, ConvLstm_out)
     convLstmOut = torch.reshape(convLstmOut, (cl_out_shape[1], cl_out_shape[2], cl_out_shape[3]))
+    #print(convLstmOut.shape)
+    '''
+    return convLstmOut
+"""
+
+def attention(ConvLstm_out):
+    ConvLstm_out = torch.stack(ConvLstm_out[0])
+    ConvLstm_out = ConvLstm_out.view(ConvLstm_out.shape[0],ConvLstm_out.shape[2],ConvLstm_out.shape[3],ConvLstm_out.shape[4])
+    ConvLstm_out_shape = ConvLstm_out.shape
+    
+    attention_w = []
+    for k in range(5):
+        attention_w.append(torch.sum(torch.mul(ConvLstm_out[k], ConvLstm_out[-1]))/5)
+    m = nn.Softmax()
+    '''
+    attention_w = m(torch.stack(attention_w))
+    ConvLstm_out = torch.reshape(ConvLstm_out, (5, -1))
+    #print(attention_w.shape)
+
+    for index, value in enumerate(ConvLstm_out):
+        #ConvLstm_out[index] *= attention_w[index]
+        ConvLstm_out[index] = torch.matmul(ConvLstm_out[index], attention_w[index])
+
+    ConvLstm_out = torch.reshape(ConvLstm_out, (ConvLstm_out_shape[0], ConvLstm_out_shape[1], ConvLstm_out_shape[2], ConvLstm_out_shape[3]))
+    '''
+    #'''
+    attention_w = torch.reshape(m(torch.stack(attention_w)), (-1, 5))
+    cl_out_shape = ConvLstm_out.shape
+    ConvLstm_out = torch.reshape(ConvLstm_out, (5, -1))
+    convLstmOut = torch.matmul(attention_w, ConvLstm_out)
+    convLstmOut = torch.reshape(convLstmOut, (cl_out_shape[1], cl_out_shape[2], cl_out_shape[3]))
+    #'''
+    #return ConvLstm_out
     return convLstmOut
 
 class CnnEncoder(nn.Module):
@@ -61,15 +105,26 @@ class Conv_LSTM(nn.Module):
 
     def forward(self, conv1_out, conv2_out, 
                 conv3_out, conv4_out):
+        #'''
         conv1_lstm_out = self.conv1_lstm(conv1_out)
-        conv1_lstm_out = attention(conv1_lstm_out[0][0])
+        #conv1_lstm_out = attention(conv1_lstm_out[0][0])
+        conv1_lstm_out = attention(conv1_lstm_out)
+        
         conv2_lstm_out = self.conv2_lstm(conv2_out)
-        conv2_lstm_out = attention(conv2_lstm_out[0][0])
+        #conv2_lstm_out = attention(conv2_lstm_out[0][0])
+        conv2_lstm_out = attention(conv2_lstm_out)
+        
         conv3_lstm_out = self.conv3_lstm(conv3_out)
-        conv3_lstm_out = attention(conv3_lstm_out[0][0])
+        #conv3_lstm_out = attention(conv3_lstm_out[0][0])
+        conv3_lstm_out = attention(conv3_lstm_out)
+        
         conv4_lstm_out = self.conv4_lstm(conv4_out)
-        conv4_lstm_out = attention(conv4_lstm_out[0][0])
+        #conv4_lstm_out = attention(conv4_lstm_out[0][0])
+        conv4_lstm_out = attention(conv4_lstm_out)
+        
         return conv1_lstm_out.unsqueeze(0), conv2_lstm_out.unsqueeze(0), conv3_lstm_out.unsqueeze(0), conv4_lstm_out.unsqueeze(0)
+        #return conv1_lstm_out, conv2_lstm_out, conv3_lstm_out, conv4_lstm_out
+        #'''
 
 class CnnDecoder(nn.Module):
     def __init__(self, in_channels):
