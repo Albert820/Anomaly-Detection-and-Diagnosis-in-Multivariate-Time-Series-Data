@@ -45,6 +45,7 @@ class ConvLSTMCell(nn.Module):
             self.Wcf = Variable(torch.zeros(1, hidden, shape[0], shape[1])).to("cpu")
             self.Wco = Variable(torch.zeros(1, hidden, shape[0], shape[1])).to("cpu")
             '''
+            
             self.Wci = Variable(torch.zeros(1, hidden, shape[0], shape[1])).to("cuda")
             self.Wcf = Variable(torch.zeros(1, hidden, shape[0], shape[1])).to("cuda")
             self.Wco = Variable(torch.zeros(1, hidden, shape[0], shape[1])).to("cuda")

@@ -34,6 +34,7 @@ def attention(ConvLstm_out):
     return convLstmOut
 """
 
+"""
 def attention(ConvLstm_out):
     ConvLstm_out = torch.stack(ConvLstm_out[0])
     ConvLstm_out = ConvLstm_out.view(ConvLstm_out.shape[0],ConvLstm_out.shape[2],ConvLstm_out.shape[3],ConvLstm_out.shape[4])
@@ -60,6 +61,42 @@ def attention(ConvLstm_out):
     ConvLstm_out = torch.reshape(ConvLstm_out, (5, -1))
     convLstmOut = torch.matmul(attention_w, ConvLstm_out)
     convLstmOut = torch.reshape(convLstmOut, (cl_out_shape[1], cl_out_shape[2], cl_out_shape[3]))
+    #'''
+    #return ConvLstm_out
+    return convLstmOut
+"""
+
+def attention(ConvLstm_out):
+    ConvLstm_out = torch.stack(ConvLstm_out[0])
+    ConvLstm_out = ConvLstm_out.view(ConvLstm_out.shape[0],ConvLstm_out.shape[2],ConvLstm_out.shape[3],ConvLstm_out.shape[4])
+    ConvLstm_out_shape = ConvLstm_out.shape
+    
+    attention_w = []
+    for k in range(5):
+        attention_w.append(torch.mul(ConvLstm_out[k], ConvLstm_out[-1])/5)
+    m = nn.Softmax()
+
+    attention_w = m(torch.stack(attention_w))
+    #print("attention_w shape: ", attention_w.shape)
+    '''
+    attention_w = m(torch.stack(attention_w))
+    ConvLstm_out = torch.reshape(ConvLstm_out, (5, -1))
+    #print(attention_w.shape)
+
+    for index, value in enumerate(ConvLstm_out):
+        #ConvLstm_out[index] *= attention_w[index]
+        ConvLstm_out[index] = torch.matmul(ConvLstm_out[index], attention_w[index])
+
+    ConvLstm_out = torch.reshape(ConvLstm_out, (ConvLstm_out_shape[0], ConvLstm_out_shape[1], ConvLstm_out_shape[2], ConvLstm_out_shape[3]))
+    '''
+    #'''
+    #attention_w = torch.reshape(m(torch.stack(attention_w)), (-1, 5))
+    #attention_w = torch.reshape(m(torch.stack(attention_w)), (-1, 5))
+    cl_out_shape = ConvLstm_out.shape
+    #ConvLstm_out = torch.reshape(ConvLstm_out, (5, -1))
+    convLstmOut = torch.matmul(attention_w, ConvLstm_out)
+    #convLstmOut = torch.reshape(convLstmOut, (cl_out_shape[0], cl_out_shape[1], cl_out_shape[2], cl_out_shape[3]))
+    convLstmOut = torch.sum(convLstmOut, 0)
     #'''
     #return ConvLstm_out
     return convLstmOut
